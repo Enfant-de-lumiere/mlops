@@ -29,14 +29,13 @@ jobs:
           username: ${{ secrets.GHCR_USERNAME }}
           password: ${{ secrets.GHCR_TOKEN }}
 
-      # Construire l'image Docker
+      # Build and push image docker to GHCR service_b
       - name: Build Docker image
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/service_a
           docker build -t $IMAGE_NAME:latest ./hands_on_microservices/service_a
           
-      # Marquer l'image avec un tag basé sur le SHA du commit
       - name: Tag Docker image
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -44,7 +43,6 @@ jobs:
           IMAGE_TAG=${GITHUB_SHA::7}
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
 
-      # Pousser l'image vers GHCR
       - name: Push Docker image to GHCR
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -53,14 +51,13 @@ jobs:
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:$IMAGE_TAG
 
-      # Construire l'image Docker
+      # Build and push image docker to GHCR service_b
       - name: Build Docker image
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           IMAGE_NAME=ghcr.io/$OWNER/service_b
           docker build -t $IMAGE_NAME:latest ./hands_on_microservices/service_b
 
-      # Marquer l'image avec un tag basé sur le SHA du commit
       - name: Tag Docker image
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -68,7 +65,6 @@ jobs:
           IMAGE_TAG=${GITHUB_SHA::7}
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
 
-      # Pousser l'image vers GHCR
       - name: Push Docker image to GHCR
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
@@ -77,20 +73,3 @@ jobs:
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:$IMAGE_TAG
 
-  deploy:
-    name: Deploy to Server
-    needs: build-and-push
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Connect and Deploy
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            docker pull ghcr.io/${{ secrets.GHCR_USERNAME }}/service_a:latest
-            docker pull ghcr.io/${{ secrets.GHCR_USERNAME }}/service_b:latest
-            docker compose down
-            docker compose up -d
