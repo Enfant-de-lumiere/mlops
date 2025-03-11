@@ -31,7 +31,7 @@ jobs:
           file: ./service_a/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ secrets.GHCR_USERNAME }}/service_a:latest
+            ghcr.io/${{ secrets.GHCR_USERNAME_UNDERCASE }}/service_a:latest
 
       - name: Build and Push service_b
         uses: docker/build-push-action@v5
@@ -40,7 +40,7 @@ jobs:
           file: ./service_b/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ secrets.GHCR_USERNAME }}/service_b:latest
+            ghcr.io/${{ secrets.GHCR_USERNAME_UNDERCASE }}/service_b:latest
 
   deploy:
     name: Deploy to Server
