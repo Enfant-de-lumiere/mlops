@@ -32,14 +32,14 @@ jobs:
       # Construire l'image Docker
       - name: Build Docker image
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_a
           docker build -t $IMAGE_NAME:latest ./hands_on_microservices/service_a
           
       # Marquer l'image avec un tag basé sur le SHA du commit
       - name: Tag Docker image
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_a
           IMAGE_TAG=${GITHUB_SHA::7}
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
@@ -47,7 +47,7 @@ jobs:
       # Pousser l'image vers GHCR
       - name: Push Docker image to GHCR
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_a
           IMAGE_TAG=${GITHUB_SHA::7}
           docker push $IMAGE_NAME:latest
@@ -56,14 +56,14 @@ jobs:
       # Construire l'image Docker
       - name: Build Docker image
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_b
           docker build -t $IMAGE_NAME:latest ./hands_on_microservices/service_b
 
       # Marquer l'image avec un tag basé sur le SHA du commit
       - name: Tag Docker image
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_b
           IMAGE_TAG=${GITHUB_SHA::7}
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
@@ -71,7 +71,7 @@ jobs:
       # Pousser l'image vers GHCR
       - name: Push Docker image to GHCR
         run: |
-          OWNER=$(echo "${{secret.GHCR_USERNAME_UNDERCASE}}")
+          OWNER=$(echo "${{secrets.GHCR_USERNAME_UNDERCASE}}")
           IMAGE_NAME=ghcr.io/$OWNER/service_b
           IMAGE_TAG=${GITHUB_SHA::7}
           docker push $IMAGE_NAME:latest
