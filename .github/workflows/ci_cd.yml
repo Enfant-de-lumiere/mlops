@@ -27,8 +27,8 @@ jobs:
       - name: Build and Push service_a
         uses: docker/build-push-action@v5
         with:
-          context: ./service_a
-          file: ./service_a/Dockerfile
+          context: ./hands_on_microservices/service_a
+          file: ./hands_on_microservices/service_a/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ secrets.GHCR_USERNAME_UNDERCASE }}/service_a:latest
@@ -36,8 +36,8 @@ jobs:
       - name: Build and Push service_b
         uses: docker/build-push-action@v5
         with:
-          context: ./service_b
-          file: ./service_b/Dockerfile
+          context: ./hands_on_microservices/service_b
+          file: ./hands_on_microservices/service_b/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ secrets.GHCR_USERNAME_UNDERCASE }}/service_b:latest
