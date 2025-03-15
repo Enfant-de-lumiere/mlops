@@ -22,3 +22,16 @@ Pour se connecter :
         username : admin,
         mdp: admin
 
+## Partie 3
+![alt text](architecture.excalidraw.png)
+Pour répondre à cette problématique, je ferai l'architecture suivante :
+    -UI : d'afficher les données brutes à annoter + faire du monitoring des métriques et logs des modèles.
+    -API DATA : une API permettant d'interagir avec Elastic Search pour ajouter,modifier,supprimer et récupérer des annotations.
+    -Elastic Search: Interagit avec la base de donnée MONGODB je l'utilise car j'aurai beaucoups de données.
+    -MongoDB: Stocker les données brutes (annotations+ métriques et logs des modèles).
+    -Train Model: Entraine un modèle choisit dans l'UI, s'occupe aussi du versionning.
+    -Model Serving: Récupère tous les modèles et leurs versions puis choisi lequel mettre en production, permet aussi de faire
+                    des prédictions.
+    -Metrics Model: Récupère tous les résultats de l'entrainement du modèle et les ajoutent dans la base de donnée MongoDB.
+En résumé, je reprenderai ce que j'ai fait de la partie 2 pour l'UI+API DATA+MongoDB et je rajouterai Elastic Search puis
+le système MLFlow que j'ai mis dans le projet BIG DATA/MlOps.
