@@ -7,3 +7,18 @@ Il permet aussi de créer un seul endpoint sur plusieurs instances du même serv
     -je n'ai pas prévu de le déployer sur un cloud, cela aurait été pertinent d'utilise Minikube pour simuler Kubernetes
     en local puis Kurbenetes sur le cloud mais mon projet est uniquement en local.
 
+## Partie 2
+J'ai initialisé une base de donnée test et une collection test_collection dans init-mongo.js.
+Ensuite, j'ai découpé l'architecture en deux services :
+    -le service_a me sert de UI pour l'affichage.
+    -le service_b me sert de API pour intéragir avec la base de donnée.
+J'ai ajouté mongo-express pour visualiser la base de donnée sur le port 8081.
+J'utilise un système d'authentification avec JWT pour gérer les accès entre les deux rôles USER et ADMIN.
+Pour se connecter :
+    Avec le rôle USER: 
+        username : user, 
+        mdp : user
+    Avec le rôle ADMIN: 
+        username : admin,
+        mdp: admin
+

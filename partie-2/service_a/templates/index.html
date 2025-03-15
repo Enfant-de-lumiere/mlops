@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login & Data</title>
     <script>
+        const BASE_URL = "http://localhost/service_b";
+
+        function resetInput(){
+            document.getElementById("username").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("new-data").value = "";
+            document.getElementById("update-id").value = "";
+            document.getElementById("update-value").value = "";
+            document.getElementById("new-data-result").innerText = "";
+            document.getElementById("update-data-result").innerText = "";
+            document.getElementById("data-table").innerHTML = "";
+        }
+
         function checkLoginStatus() {
             let username = sessionStorage.getItem("username");
             let role = sessionStorage.getItem("role");
@@ -13,19 +26,10 @@
                 document.getElementById("login-form").style.display = "none";
                 document.getElementById("user-info").style.display = "block";
                 document.getElementById("username-display").innerText = username;
-
-                // Activer l'insertion de données après connexion
                 document.getElementById("insert-section").style.display = "block";
-
-                if (role === "ADMIN") {
-                    document.getElementById("admin-actions").style.display = "block";
-                } else {
-                    document.getElementById("admin-actions").style.display = "none";
-                }
             } else {
                 document.getElementById("login-form").style.display = "block";
                 document.getElementById("user-info").style.display = "none";
-                document.getElementById("admin-actions").style.display = "none";
                 document.getElementById("insert-section").style.display = "none";
             }
         }
@@ -34,7 +38,7 @@
             let username = document.getElementById("username").value;
             let password = document.getElementById("password").value;
 
-            let response = await fetch("/service_b/authenticate", {
+            let response = await fetch(`${BASE_URL}/authenticate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password })
@@ -47,6 +51,7 @@
                 sessionStorage.setItem("role", result.role);
                 document.getElementById("status").innerText = "✅ Connecté !";
                 checkLoginStatus();  
+                resetInput();
             } else {
                 document.getElementById("status").innerText = "❌ Erreur de connexion";
             }
@@ -54,31 +59,71 @@
 
         function logout() {
             sessionStorage.clear();
+            document.getElementById("status").innerText = "👋 Déconnecté !";
             checkLoginStatus();  
+            resetInput();
+        }
+
+        function token_valid(token){
+            if(!token){
+                alert("Connectez-vous d'abord !");
+                logout();
+            }         
         }
 
         async function fetchData() {
             let token = sessionStorage.getItem("token");
+            token_valid(token);
 
-            if (!token) {
-                alert("Connectez-vous d'abord !");
-                return;
-            }
-
-            let response = await fetch("/service_b/data", {
+            let response = await fetch(`${BASE_URL}/data`, {
                 method: "GET",
                 headers: { "Authorization": "Bearer " + token }
             });
-
             let data = await response.json();
-            document.getElementById("data").innerText = JSON.stringify(data, null, 2);
+            if(data.detail){
+                document.getElementById("data-table").innerHTML = data.detail;
+                return;
+            }
+
+            let tableContainer = document.getElementById("data-table");
+            tableContainer.innerHTML = "";
+            if (data.length === 0) {
+                tableContainer.innerHTML = "<p>Aucune donnée disponible.</p>";
+                return;
+            }
+
+            let table = document.createElement("table");
+            table.style.borderCollapse = "collapse";
+            table.style.marginTop = "10px";
+            table.border = "2";
+
+            let thead = document.createElement("thead");
+            thead.innerHTML = "<tr><th>ID</th><th>Valeur</th></tr>";
+            table.appendChild(thead);
+
+            let tbody = document.createElement("tbody");
+            data.forEach(doc => {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td style="padding: 8px; text-align: center;">${doc._id}</td>
+                    <td style="padding: 8px; text-align: center;">${doc.value}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
         }
 
         async function insertData() {
             let value = document.getElementById("new-data").value;
             let token = sessionStorage.getItem("token");
+            token_valid(token);
+            if (!value) {
+                alert("Veuillez donner une valeur avant d'ajouter.");
+                return;
+            }
 
-            let response = await fetch("/service_b/data", {
+            let response = await fetch(`${BASE_URL}/data`, {
                 method: "POST",
                 headers: { 
                     "Authorization": "Bearer " + token,
@@ -88,15 +133,20 @@
             });
 
             let result = await response.json();
-            alert("Donnée insérée : " + result._id);
+            document.getElementById("new-data-result").innerText = "Donnée insérée avec succès ! \n id : " + result._id;
         }
 
         async function updateData() {
             let docId = document.getElementById("update-id").value;
             let newValue = document.getElementById("update-value").value;
             let token = sessionStorage.getItem("token");
+            token_valid(token);
+            if (!docId || !newValue) {
+                alert("Veuillez donner un ID et une nouvelle valeur avant de mettre à jour.");
+                return;
+            }
 
-            let response = await fetch("/service_b/data/" + docId, {
+            let response = await fetch(`${BASE_URL}/data/${docId}`, {
                 method: "PUT",
                 headers: { 
                     "Authorization": "Bearer " + token,
@@ -106,15 +156,16 @@
             });
 
             let result = await response.json();
-            alert(result.modified ? "Donnée mise à jour !" : "Aucune modification");
+            if(result.detail)
+            document.getElementById("update-data-result").innerText = result.detail;
+            else
+            document.getElementById("update-data-result").innerText = "Donnée modifiée avec succès ! \n id : " + result._id;
         }
-
         window.onload = checkLoginStatus;
     </script>
 </head>
 <body>
 
-    <!-- Formulaire de connexion -->
     <div id="login-form">
         <h1>Connexion</h1>
         <input type="text" id="username" placeholder="Nom d'utilisateur">
@@ -123,29 +174,24 @@
         <p id="status"></p>
     </div>
 
-    <!-- Informations utilisateur -->
     <div id="user-info" style="display: none;">
         <h2>✅ Connecté en tant que <span id="username-display"></span></h2>
         <button onclick="logout()">Se déconnecter</button>
     </div>
 
-    <!-- Formulaire pour insérer des données (UNIQUEMENT SI CONNECTÉ) -->
     <div id="insert-section" style="display: none;">
         <h2>Insérer des données</h2>
         <input type="text" id="new-data" placeholder="Nouvelle valeur">
         <button onclick="insertData()">Ajouter</button>
-    </div>
-
-    <!-- Actions Admin (seulement visibles pour ADMIN) -->
-    <div id="admin-actions" style="display: none;">
+        <pre id="new-data-result"></pre>
         <h2>Modifier une donnée</h2>
         <input type="text" id="update-id" placeholder="ID">
         <input type="text" id="update-value" placeholder="Nouvelle valeur">
         <button onclick="updateData()">Mettre à jour</button>
-
+        <pre id="update-data-result"></pre>
         <h2>Données stockées</h2>
         <button onclick="fetchData()">Obtenir les données</button>
-        <pre id="data"></pre>
+        <div id="data-table"></div>
     </div>
 
 </body>

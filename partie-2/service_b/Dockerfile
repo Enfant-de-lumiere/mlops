@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y curl gnupg && \
     echo "deb [signed-by=/usr/share/keyrings/mongodb-server-keyring.gpg] https://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list && \
     apt-get update && apt-get install -y mongodb-mongosh && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    pip install fastapi uvicorn pymongo datetime jwt
+    pip install fastapi uvicorn pymongo datetime PyJWT
 # # Copy the application code
 COPY main.py /app/main.py
 # Set the working directory to /app

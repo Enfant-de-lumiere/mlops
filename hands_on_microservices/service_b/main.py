@@ -10,12 +10,12 @@ try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=3000)  # Timeout après 3s
     db = client["test"]
     collection = db["test_collection"]
-    print("✅ Connexion réussie !")
-    print("📌 Bases de données disponibles :", client.list_database_names())
+    print("Connexion réussie !")
+    print("Bases de données disponibles :", client.list_database_names())
     print("Collection", collection)
     print("DB", db)
 except Exception as e:
-    print("❌ Erreur de connexion :", e)
+    print("Erreur de connexion :", e)
 
 app = FastAPI()
 #Récuperer les documents
