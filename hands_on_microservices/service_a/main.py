@@ -11,10 +11,10 @@ transport = httpx.AsyncHTTPTransport(uds=uds_path)
 
 app = FastAPI()
 
+token= ""
 
 @app.get("/data")
 async def get_data():
-    # Standard URL format without http+unix://
     url = f"{URL}/data"
     async with httpx.AsyncClient(transport=transport) as client:
         response = await client.get(url)
@@ -41,4 +41,12 @@ async def add_data(name: str, value: int):
 async def delete_data(doc_id: str):
     async with httpx.AsyncClient(transport=transport) as client:
         response = await client.delete(f"{URL}/data/{doc_id}")
+        return response.json()
+    
+@app.post("/authenticate")
+async def authenticate(username: str, password: str):
+    async with httpx.AsyncClient(transport=transport) as client:
+        data = {"username": username, "password": password}
+        response = await client.post(f"{URL}/authenticate", json=data)
+        token = response.json()
         return response.json()

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Data</title>
+    <script>
+        function checkLoginStatus() {
+            let username = sessionStorage.getItem("username");
+            let role = sessionStorage.getItem("role");
+
+            if (username) {
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("user-info").style.display = "block";
+                document.getElementById("username-display").innerText = username;
+
+                // Activer l'insertion de données après connexion
+                document.getElementById("insert-section").style.display = "block";
+
+                if (role === "ADMIN") {
+                    document.getElementById("admin-actions").style.display = "block";
+                } else {
+                    document.getElementById("admin-actions").style.display = "none";
+                }
+            } else {
+                document.getElementById("login-form").style.display = "block";
+                document.getElementById("user-info").style.display = "none";
+                document.getElementById("admin-actions").style.display = "none";
+                document.getElementById("insert-section").style.display = "none";
+            }
+        }
+
+        async function login() {
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+
+            let response = await fetch("/service_b/authenticate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            let result = await response.json();
+            if (result.access_token) {
+                sessionStorage.setItem("token", result.access_token);
+                sessionStorage.setItem("username", username);
+                sessionStorage.setItem("role", result.role);
+                document.getElementById("status").innerText = "✅ Connecté !";
+                checkLoginStatus();  
+            } else {
+                document.getElementById("status").innerText = "❌ Erreur de connexion";
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            checkLoginStatus();  
+        }
+
+        async function fetchData() {
+            let token = sessionStorage.getItem("token");
+
+            if (!token) {
+                alert("Connectez-vous d'abord !");
+                return;
+            }
+
+            let response = await fetch("/service_b/data", {
+                method: "GET",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            let data = await response.json();
+            document.getElementById("data").innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function insertData() {
+            let value = document.getElementById("new-data").value;
+            let token = sessionStorage.getItem("token");
+
+            let response = await fetch("/service_b/data", {
+                method: "POST",
+                headers: { 
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ value })
+            });
+
+            let result = await response.json();
+            alert("Donnée insérée : " + result._id);
+        }
+
+        async function updateData() {
+            let docId = document.getElementById("update-id").value;
+            let newValue = document.getElementById("update-value").value;
+            let token = sessionStorage.getItem("token");
+
+            let response = await fetch("/service_b/data/" + docId, {
+                method: "PUT",
+                headers: { 
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ value: newValue })
+            });
+
+            let result = await response.json();
+            alert(result.modified ? "Donnée mise à jour !" : "Aucune modification");
+        }
+
+        window.onload = checkLoginStatus;
+    </script>
+</head>
+<body>
+
+    <!-- Formulaire de connexion -->
+    <div id="login-form">
+        <h1>Connexion</h1>
+        <input type="text" id="username" placeholder="Nom d'utilisateur">
+        <input type="password" id="password" placeholder="Mot de passe">
+        <button onclick="login()">Se connecter</button>
+        <p id="status"></p>
+    </div>
+
+    <!-- Informations utilisateur -->
+    <div id="user-info" style="display: none;">
+        <h2>✅ Connecté en tant que <span id="username-display"></span></h2>
+        <button onclick="logout()">Se déconnecter</button>
+    </div>
+
+    <!-- Formulaire pour insérer des données (UNIQUEMENT SI CONNECTÉ) -->
+    <div id="insert-section" style="display: none;">
+        <h2>Insérer des données</h2>
+        <input type="text" id="new-data" placeholder="Nouvelle valeur">
+        <button onclick="insertData()">Ajouter</button>
+    </div>
+
+    <!-- Actions Admin (seulement visibles pour ADMIN) -->
+    <div id="admin-actions" style="display: none;">
+        <h2>Modifier une donnée</h2>
+        <input type="text" id="update-id" placeholder="ID">
+        <input type="text" id="update-value" placeholder="Nouvelle valeur">
+        <button onclick="updateData()">Mettre à jour</button>
+
+        <h2>Données stockées</h2>
+        <button onclick="fetchData()">Obtenir les données</button>
+        <pre id="data"></pre>
+    </div>
+
+</body>
+</html>

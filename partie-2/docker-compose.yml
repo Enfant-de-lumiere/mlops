@@ -8,8 +8,8 @@ services:
     volumes:
       - mongo_data:/data/db
     ports:
-      - "8001:8001"
-    command: ["mongod", "--port", "8001"]
+      - "8080:8080"
+    command: ["mongod", "--port", "8080"]
 
   mongo-express:
     image: mongo-express
@@ -18,14 +18,17 @@ services:
       - "8081:8081"
     environment:
       ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 8001
+      ME_CONFIG_MONGODB_PORT: 8080
       ME_CONFIG_BASICAUTH: false
+
   service_b:
     build:
       context: ./service_b
       dockerfile: Dockerfile
     volumes:
       - tmp:/tmp
+    ports:
+      - "8001:8001"
     restart: always
 
   service_a:
@@ -39,11 +42,12 @@ services:
     depends_on:
       - service_b
     restart: always
+
   nginx:
     image: nginx:latest
     restart: always
     ports:
-      - "80:80"  # On expose Nginx sur le port 80
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
