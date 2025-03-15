@@ -31,6 +31,7 @@ Pour se connecter :
 
 ## Partie 3
 ![alt text](architecture.excalidraw.png)
+
 Pour répondre à cette problématique, je ferai l'architecture suivante :
 
 - **UI** : d'afficher les données brutes à annoter + faire du monitoring des métriques et logs des modèles.
