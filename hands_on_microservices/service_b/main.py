@@ -4,7 +4,7 @@ from bson import ObjectId
 import uvicorn
 
 # Connexion à MongoDB
-MONGO_URL = "mongodb://mongodb:8001/"
+MONGO_URL = "mongodb://mongodb:27017/"
 
 try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=3000)  # Timeout après 3s
